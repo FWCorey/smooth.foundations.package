@@ -1,0 +1,12 @@
+{
+  "name": "com.smooth.foundation",
+  "displayName": "Smooth Foundations Package",
+  "version": "2.0.3",
+  "unity": "2019.1",
+  "dependencies": {},
+  "keywords": [
+    "smooth",
+	"pooling"
+  ],
+  "description": "Smooth.Foundations is an MIT licensed code package that provides basic classes for boosting programmer productivity and writing clean, maintainable, allocation-free code in Unity.  The code is written in C# and very little is Unity specific; It can also be used on other .Net platforms."
+}
