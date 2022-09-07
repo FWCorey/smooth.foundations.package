@@ -1,11 +1,8 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections.Generic;
-using System.Runtime;
 using Smooth.Algebraics;
-using Smooth.Collections;
-using Smooth.Compare.Comparers;
-using Smooth.Platform;
+
 
 namespace Smooth.Compare {
 	///
@@ -114,7 +111,6 @@ namespace Smooth.Compare {
 
 				#region Smooth enums
 				
-				Finder.RegisterEnum<BasePlatform>();
 				Finder.RegisterEnum<ComparerType>();
 				Finder.RegisterEnum<EventType>();
 
@@ -153,7 +149,7 @@ namespace Smooth.Compare {
 		/// <summary>
 		/// This can be used to override the platform setting and enable or disable automatic comparer creation, which can be quite useful while testing in different environments.
 		/// </summary>
-		public virtual bool UseJit { get { return Runtime.hasJit; } }
+		public virtual bool UseJit { get { return Application.platform == RuntimePlatform.Stadia; } }
 		
 		/// <summary>
 		/// Convenience method for !UseJit.

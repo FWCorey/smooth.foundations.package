@@ -199,8 +199,8 @@ namespace Smooth.Compare {
 			var keyComparer = ExistingComparer(keyL.Type);
 			var valueComparer = ExistingComparer(valueL.Type);
 
-			var keysCompared = Expression.Lambda<Comparison<T>>(Expression.Call(keyComparer._1, keyComparer._2, keyL, keyR), l, r).Compile();
-			var valuesCompared = Expression.Lambda<Comparison<T>>(Expression.Call(valueComparer._1, valueComparer._2, valueL, valueR), l, r).Compile();
+			var keysCompared = Expression.Lambda<Comparison<T>>(Expression.Call(keyComparer.Item1, keyComparer.Item2, keyL, keyR), l, r).Compile();
+			var valuesCompared = Expression.Lambda<Comparison<T>>(Expression.Call(valueComparer.Item1, valueComparer.Item2, valueL, valueR), l, r).Compile();
 
 			return new FuncComparer<T>((lhs, rhs) => { var c = keysCompared(lhs, rhs); return c == 0 ? valuesCompared(lhs, rhs) : c; });
 		}
@@ -232,13 +232,13 @@ namespace Smooth.Compare {
 			var keyComparer = ExistingEqualityComparer(keyL.Type);
 			var valueComparer = ExistingEqualityComparer(valueL.Type);
 
-			var keysEqual = Expression.Call(keyComparer._1, keyComparer._2, keyL, keyR);
-			var valuesEqual = Expression.Call(valueComparer._1, valueComparer._2, valueL, valueR);
+			var keysEqual = Expression.Call(keyComparer.Item1, keyComparer.Item2, keyL, keyR);
+			var valuesEqual = Expression.Call(valueComparer.Item1, valueComparer.Item2, valueL, valueR);
 
 			var equals = Expression.And(keysEqual, valuesEqual);
 
-			var hashCodeKey = Expression.Call(keyComparer._1, keyComparer._3, keyL);
-			var hashCodeValue = Expression.Call(valueComparer._1, valueComparer._3, valueL);
+			var hashCodeKey = Expression.Call(keyComparer.Item1, keyComparer.Item3, keyL);
+			var hashCodeValue = Expression.Call(valueComparer.Item1, valueComparer.Item3, valueL);
 
 			var hashCode = HashCodeSeed();
 			var hashCodeStepMultiplier = HashCodeStepMultiplier();

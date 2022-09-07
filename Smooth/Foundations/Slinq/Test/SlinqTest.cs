@@ -15,19 +15,19 @@ namespace Smooth.Slinq.Test {
 	/// Test controller and (de)verifier for Smooth.Slinq.
 	/// </summary>
 	public class SlinqTest : MonoBehaviour {
-		public static readonly DelegateFunc<Tuple<int, int>, Tuple<int, int>, bool> eq = (a, b) => a == b;
-		public static readonly DelegateFunc<Tuple<int, int, int>, Tuple<int, int, int>, bool> eq_t3 = (a, b) => a == b;
+		public static readonly DelegateFunc<ValueTuple<int, int>, ValueTuple<int, int>, bool> eq = (a, b) => a == b;
+		public static readonly DelegateFunc<ValueTuple<int, int, int>, ValueTuple<int, int, int>, bool> eq_t3 = (a, b) => a == b;
 
-		public static readonly DelegateFunc<Tuple<int, int>, int> to_1 = t => t._1;
-		public static readonly Func<Tuple<int, int>, int> to_1f = t => t._1;
+		public static readonly DelegateFunc<ValueTuple<int, int>, int> to_1 = t => t.Item1;
+		public static readonly Func<ValueTuple<int, int>, int> to_1f = t => t.Item1;
 
-		public static readonly IEqualityComparer<Tuple<int, int>> eq_1 = new Equals_1<int, int>();
-		//public static readonly DelegateFunc<Tuple<int, int>, Tuple<int, int>, bool> eq_1_p = Comparisons<Tuple<int, int>>.ToPredicate(eq_1);
+		public static readonly IEqualityComparer<ValueTuple<int, int>> eq_1 = new Equals_1<int, int>();
+		//public static readonly DelegateFunc<ValueTuple<int, int>, Tuple<int, int>, bool> eq_1_p = Comparisons<ValueTuple<int, int>>.ToPredicate(eq_1);
 
 		public static readonly StringBuilder stringBuilder = new StringBuilder();
 
-		public static List<Tuple<int, int>> tuples1 = new List<Tuple<int, int>>();
-		public static List<Tuple<int, int>> tuples2 = new List<Tuple<int, int>>();
+		public static List<ValueTuple<int, int>> tuples1 = new List<ValueTuple<int, int>>();
+		public static List<ValueTuple<int, int>> tuples2 = new List<ValueTuple<int, int>>();
 
 		public static int loops = 1;
 
@@ -42,8 +42,8 @@ namespace Smooth.Slinq.Test {
 		public bool testCorrectness;
 
 		private void Start() {
-			tuples1 = new List<Tuple<int, int>>(maxCount);
-			tuples2 = new List<Tuple<int, int>>(maxCount);
+			tuples1 = new List<ValueTuple<int, int>>(maxCount);
+			tuples2 = new List<ValueTuple<int, int>>(maxCount);
 			loops = speedLoops;
 
 			Debug.Log("Element count: " + minCount + " to " + maxCount + ", value range: " + minValue + " to " + maxValue + ", loops: " + loops);
@@ -67,48 +67,48 @@ namespace Smooth.Slinq.Test {
 
 			var count = UnityEngine.Random.Range(minCount, maxCount + 1);
 			for (int i = 0; i < count; ++i) {
-				tuples1.Add(new Tuple<int, int>(UnityEngine.Random.Range(minValue, maxValue + 1), i));
-				tuples2.Add(new Tuple<int, int>(UnityEngine.Random.Range(minValue, maxValue + 1), i));
+				tuples1.Add(new ValueTuple<int, int>(UnityEngine.Random.Range(minValue, maxValue + 1), i));
+				tuples2.Add(new ValueTuple<int, int>(UnityEngine.Random.Range(minValue, maxValue + 1), i));
 			}
 		}
 
 		private void TestCorrectness() {
 			var testTuple = tuples2.Slinq().FirstOrDefault();
-			var testInt = testTuple._1;
+			var testInt = testTuple.Item1;
 			var testInt2 = testInt * (maxValue - minValue + 1) / 25;
 			var midSkip = UnityEngine.Random.value < 0.5f ? testInt : 0;
 
-			if (tuples1.Slinq().Aggregate(0, (acc, next) => acc + next._1) != tuples1.Aggregate(0, (acc, next) => acc + next._1)) {
+			if (tuples1.Slinq().Aggregate(0, (acc, next) => acc + next.Item1) != tuples1.Aggregate(0, (acc, next) => acc + next.Item1)) {
 				Debug.LogError("Aggregate failed.");
 				testCorrectness = false;
 			}
 
-			if (tuples1.Slinq().Aggregate(0, (acc, next) => acc + next._1, acc => -acc) != tuples1.Aggregate(0, (acc, next) => acc + next._1, acc => -acc)) {
+			if (tuples1.Slinq().Aggregate(0, (acc, next) => acc + next.Item1, acc => -acc) != tuples1.Aggregate(0, (acc, next) => acc + next.Item1, acc => -acc)) {
 				Debug.LogError("Aggregate failed.");
 				testCorrectness = false;
 			}
 			
-			if (tuples1.Slinq().AggregateWhile(0, (acc, next) => acc < testInt2 ? new Option<int>(acc + next._1) : new Option<int>()) != tuples1.Slinq().AggregateRunning(0, (acc, next) => acc + next._1).Where(acc => acc >= testInt2).FirstOrDefault()) {
+			if (tuples1.Slinq().AggregateWhile(0, (acc, next) => acc < testInt2 ? new Option<int>(acc + next.Item1) : new Option<int>()) != tuples1.Slinq().AggregateRunning(0, (acc, next) => acc + next.Item1).Where(acc => acc >= testInt2).FirstOrDefault()) {
 				Debug.LogError("AggregateWhile / AggregateRunning failed.");
 				testCorrectness = false;
 			}
 
-			if (tuples1.Slinq().All(x => x._1 < testInt2) ^ tuples1.All(x => x._1 < testInt2)) {
+			if (tuples1.Slinq().All(x => x.Item1 < testInt2) ^ tuples1.All(x => x.Item1 < testInt2)) {
 				Debug.LogError("All failed.");
 				testCorrectness = false;
 			}
 
-			if (tuples1.Slinq().All((x, c) => x._1 < c, testInt2) ^ tuples1.All(x => x._1 < testInt2)) {
+			if (tuples1.Slinq().All((x, c) => x.Item1 < c, testInt2) ^ tuples1.All(x => x.Item1 < testInt2)) {
 				Debug.LogError("All failed.");
 				testCorrectness = false;
 			}
 
-			if (tuples1.Slinq().Any(x => x._1 > testInt2) ^ tuples1.Any(x => x._1 > testInt2)) {
+			if (tuples1.Slinq().Any(x => x.Item1 > testInt2) ^ tuples1.Any(x => x.Item1 > testInt2)) {
 				Debug.LogError("All failed.");
 				testCorrectness = false;
 			}
 			
-			if (tuples1.Slinq().Any((x, c) => x._1 > c, testInt2) ^ tuples1.Any(x => x._1 > testInt2)) {
+			if (tuples1.Slinq().Any((x, c) => x.Item1 > c, testInt2) ^ tuples1.Any(x => x.Item1 > testInt2)) {
 				Debug.LogError("All failed.");
 				testCorrectness = false;
 			}
@@ -128,7 +128,7 @@ namespace Smooth.Slinq.Test {
 				testCorrectness = false;
 			}
 			
-			if (tuples1.Slinq().Where(x => x._1 < testInt).Count() != tuples1.Where(x => x._1 < testInt).Count()) {
+			if (tuples1.Slinq().Where(x => x.Item1 < testInt).Count() != tuples1.Where(x => x.Item1 < testInt).Count()) {
 				Debug.LogError("Count failed.");
 				testCorrectness = false;
 			}
@@ -148,24 +148,24 @@ namespace Smooth.Slinq.Test {
 				testCorrectness = false;
 			}
 
-			if (!tuples1.Slinq().FirstOrNone(x => x._1 < testInt).Cata(x => x == tuples1.First(z => z._1 < testInt), !tuples1.Where(z => z._1 < testInt).Any())) {
+			if (!tuples1.Slinq().FirstOrNone(x => x.Item1 < testInt).Cata(x => x == tuples1.First(z => z.Item1 < testInt), !tuples1.Where(z => z.Item1 < testInt).Any())) {
 				Debug.LogError("FirstOrNone(predicate) failed.");
 				testCorrectness = false;
 			}
 			
-			if (!tuples1.Slinq().FirstOrNone((x, t) => x._1 < t, testInt).Cata(x => x == tuples1.First(z => z._1 < testInt), !tuples1.Where(z => z._1 < testInt).Any())) {
+			if (!tuples1.Slinq().FirstOrNone((x, t) => x.Item1 < t, testInt).Cata(x => x == tuples1.First(z => z.Item1 < testInt), !tuples1.Where(z => z.Item1 < testInt).Any())) {
 				Debug.LogError("FirstOrNone(predicate, parameter) failed.");
 				testCorrectness = false;
 			}
 			
-			if (!new List<Tuple<int, int>>[] { tuples1, tuples2 }.Slinq().Select(x => x.Slinq()).Flatten().SequenceEqual(tuples1.Concat(tuples2).Slinq(), eq)) {
+			if (!new List<ValueTuple<int, int>>[] { tuples1, tuples2 }.Slinq().Select(x => x.Slinq()).Flatten().SequenceEqual(tuples1.Concat(tuples2).Slinq(), eq)) {
 				Debug.LogError("Flatten failed.");
 				testCorrectness = false;
 			}
 
 			{
 				var feAcc = 0;
-				tuples1.Slinq().ForEach(x => feAcc += x._1);
+				tuples1.Slinq().ForEach(x => feAcc += x.Item1);
 				if (feAcc != tuples1.Slinq().Select(to_1).Sum()) {
 					Debug.LogError("ForEach failed.");
 					testCorrectness = false;
@@ -184,14 +184,14 @@ namespace Smooth.Slinq.Test {
 				testCorrectness = false;
 			}
 			
-			if (!tuples1.Slinq().GroupJoin(tuples2.Slinq(), to_1, to_1, (a, bs) => Tuple.Create(a._1, a._2, bs.Count()))
-			    .SequenceEqual(tuples1.GroupJoin(tuples2, to_1f, to_1f, (a, bs) => Tuple.Create(a._1, a._2, bs.Count())).Slinq(), eq_t3)) {
+			if (!tuples1.Slinq().GroupJoin(tuples2.Slinq(), to_1, to_1, (a, bs) => ValueTuple.Create(a.Item1, a.Item2, bs.Count()))
+			    .SequenceEqual(tuples1.GroupJoin(tuples2, to_1f, to_1f, (a, bs) => ValueTuple.Create(a.Item1, a.Item2, bs.Count())).Slinq(), eq_t3)) {
 				Debug.LogError("GroupJoin failed.");
 				testCorrectness = false;
 			}
 			
-			if (!tuples1.Slinq().Join(tuples2.Slinq(), to_1, to_1, (a, b) => Tuple.Create(a._1, a._2, b._2))
-			    .SequenceEqual(tuples1.Join(tuples2, to_1f, to_1f, (a, b) => Tuple.Create(a._1, a._2, b._2)).Slinq(), eq_t3)) {
+			if (!tuples1.Slinq().Join(tuples2.Slinq(), to_1, to_1, (a, b) => ValueTuple.Create(a.Item1, a.Item2, b.Item2))
+			    .SequenceEqual(tuples1.Join(tuples2, to_1f, to_1f, (a, b) => ValueTuple.Create(a.Item1, a.Item2, b.Item2)).Slinq(), eq_t3)) {
 				Debug.LogError("Join failed.");
 				testCorrectness = false;
 			}
@@ -201,12 +201,12 @@ namespace Smooth.Slinq.Test {
 				testCorrectness = false;
 			}
 
-			if (!tuples1.Slinq().LastOrNone(x => x._1 < testInt).Cata(x => x == tuples1.Last(z => z._1 < testInt), !tuples1.Where(z => z._1 < testInt).Any())) {
+			if (!tuples1.Slinq().LastOrNone(x => x.Item1 < testInt).Cata(x => x == tuples1.Last(z => z.Item1 < testInt), !tuples1.Where(z => z.Item1 < testInt).Any())) {
 				Debug.LogError("LastOrNone(predicate) failed.");
 				testCorrectness = false;
 			}
 			
-			if (!tuples1.Slinq().LastOrNone((x, t) => x._1 < t, testInt).Cata(x => x == tuples1.Last(z => z._1 < testInt), !tuples1.Where(z => z._1 < testInt).Any())) {
+			if (!tuples1.Slinq().LastOrNone((x, t) => x.Item1 < t, testInt).Cata(x => x == tuples1.Last(z => z.Item1 < testInt), !tuples1.Where(z => z.Item1 < testInt).Any())) {
 				Debug.LogError("LastOrNone(predicate, parameter) failed.");
 				testCorrectness = false;
 			}
@@ -296,8 +296,8 @@ namespace Smooth.Slinq.Test {
 			
 			{
 				var list = RemovableList();
-				list.Slinq().Skip(midSkip).RemoveWhile(x => x._1 < testInt2);
-				if (!list.Slinq().Skip(midSkip).SequenceEqual(tuples1.Slinq().Skip(midSkip).SkipWhile(x => x._1 < testInt2), eq)) {
+				list.Slinq().Skip(midSkip).RemoveWhile(x => x.Item1 < testInt2);
+				if (!list.Slinq().Skip(midSkip).SequenceEqual(tuples1.Slinq().Skip(midSkip).SkipWhile(x => x.Item1 < testInt2), eq)) {
 					Debug.LogError("RemoveWhile failed.");
 					testCorrectness = false;
 				}
@@ -306,8 +306,8 @@ namespace Smooth.Slinq.Test {
 			{
 				var list = RemovableList();
 				var sSlinq = tuples1.Slinq().Skip(midSkip);
-				var rAcc = list.Slinq().Skip(midSkip).RemoveWhile(0, (acc, next) => acc < testInt2 ? new Option<int>(acc + next._1) : new Option<int>());
-				var sAcc = sSlinq.SkipWhile(0, (acc, next) => acc < testInt2 ? new Option<int>(acc + next._1) : new Option<int>());
+				var rAcc = list.Slinq().Skip(midSkip).RemoveWhile(0, (acc, next) => acc < testInt2 ? new Option<int>(acc + next.Item1) : new Option<int>());
+				var sAcc = sSlinq.SkipWhile(0, (acc, next) => acc < testInt2 ? new Option<int>(acc + next.Item1) : new Option<int>());
 
 				if (rAcc != sAcc || !list.Slinq().Skip(midSkip).SequenceEqual(sSlinq, eq)) {
 					Debug.LogError("RemoveWhile aggregating failed.");
@@ -352,8 +352,8 @@ namespace Smooth.Slinq.Test {
 			
 			{
 				var list = RemovableLinkedList();
-				list.Slinq().Skip(midSkip).RemoveWhile(x => x._1 < testInt2);
-				if (!list.Slinq().Skip(midSkip).SequenceEqual(tuples1.Slinq().Skip(midSkip).SkipWhile(x => x._1 < testInt2), eq)) {
+				list.Slinq().Skip(midSkip).RemoveWhile(x => x.Item1 < testInt2);
+				if (!list.Slinq().Skip(midSkip).SequenceEqual(tuples1.Slinq().Skip(midSkip).SkipWhile(x => x.Item1 < testInt2), eq)) {
 					Debug.LogError("RemoveWhile LL failed.");
 					testCorrectness = false;
 				}
@@ -362,8 +362,8 @@ namespace Smooth.Slinq.Test {
 			{
 				var list = RemovableLinkedList();
 				var sSlinq = tuples1.Slinq().Skip(midSkip);
-				var rAcc = list.Slinq().Skip(midSkip).RemoveWhile(0, (acc, next) => acc < testInt2 ? new Option<int>(acc + next._1) : new Option<int>());
-				var sAcc = sSlinq.SkipWhile(0, (acc, next) => acc < testInt2 ? new Option<int>(acc + next._1) : new Option<int>());
+				var rAcc = list.Slinq().Skip(midSkip).RemoveWhile(0, (acc, next) => acc < testInt2 ? new Option<int>(acc + next.Item1) : new Option<int>());
+				var sAcc = sSlinq.SkipWhile(0, (acc, next) => acc < testInt2 ? new Option<int>(acc + next.Item1) : new Option<int>());
 				
 				if (rAcc != sAcc || !list.Slinq().Skip(midSkip).SequenceEqual(sSlinq, eq)) {
 					Debug.LogError("RemoveWhile aggregating LL failed.");
@@ -381,12 +381,12 @@ namespace Smooth.Slinq.Test {
 				testCorrectness = false;
 			}
 			
-			if (!new List<Tuple<int, int>>[] { tuples1, tuples2 }.Slinq().SelectMany(x => x.Slinq()).SequenceEqual(tuples1.Concat(tuples2).Slinq(), eq)) {
+			if (!new List<ValueTuple<int, int>>[] { tuples1, tuples2 }.Slinq().SelectMany(x => x.Slinq()).SequenceEqual(tuples1.Concat(tuples2).Slinq(), eq)) {
 				Debug.LogError("SelectMany failed.");
 				testCorrectness = false;
 			}
 
-			if (!tuples1.Slinq().SelectMany(x => x._1 < testInt ? new Option<int>(x._1) : new Option<int>()).SequenceEqual(tuples1.Where(x => x._1 < testInt).Select(x => x._1).Slinq())) {
+			if (!tuples1.Slinq().SelectMany(x => x.Item1 < testInt ? new Option<int>(x.Item1) : new Option<int>()).SequenceEqual(tuples1.Where(x => x.Item1 < testInt).Select(x => x.Item1).Slinq())) {
 				Debug.LogError("SelectMany option failed.");
 				testCorrectness = false;
 			}
@@ -424,7 +424,7 @@ namespace Smooth.Slinq.Test {
 				}
 			}
 			
-			if (!tuples1.Slinq().SkipWhile(x => x._1 < testInt2).SequenceEqual(tuples1.SkipWhile(x => x._1 < testInt2).Slinq(), eq)) {
+			if (!tuples1.Slinq().SkipWhile(x => x.Item1 < testInt2).SequenceEqual(tuples1.SkipWhile(x => x.Item1 < testInt2).Slinq(), eq)) {
 				Debug.LogError("SkipWhile failed.");
 				testCorrectness = false;
 			}
@@ -449,14 +449,14 @@ namespace Smooth.Slinq.Test {
 				testCorrectness = false;
 			}
 
-			if (!tuples1.SlinqWithIndex().All(x => x._1._2 == x._2) ||
-			    !tuples1.SlinqWithIndex().Select(x => x._1).SequenceEqual(tuples1.Slinq(), eq)) {
+			if (!tuples1.SlinqWithIndex().All(x => x.Item1.Item2 == x.Item2) ||
+			    !tuples1.SlinqWithIndex().Select(x => x.Item1).SequenceEqual(tuples1.Slinq(), eq)) {
 				Debug.LogError("SlinqWithIndex failed.");
 				testCorrectness = false;
 			}
 			
-			if (!tuples1.SlinqWithIndexDescending().All(x => x._1._2 == x._2) ||
-			    !tuples1.SlinqWithIndexDescending().Select(x => x._1).SequenceEqual(tuples1.SlinqDescending(), eq)) {
+			if (!tuples1.SlinqWithIndexDescending().All(x => x.Item1.Item2 == x.Item2) ||
+			    !tuples1.SlinqWithIndexDescending().Select(x => x.Item1).SequenceEqual(tuples1.SlinqDescending(), eq)) {
 				Debug.LogError("SlinqWithIndexDescending failed.");
 				testCorrectness = false;
 			}
@@ -476,12 +476,12 @@ namespace Smooth.Slinq.Test {
 				testCorrectness = false;
 			}
 			
-			if (!tuples1.Slinq().TakeWhile(x => x._1 < testInt2).SequenceEqual(tuples1.TakeWhile(x => x._1 < testInt2).Slinq(), eq)) {
+			if (!tuples1.Slinq().TakeWhile(x => x.Item1 < testInt2).SequenceEqual(tuples1.TakeWhile(x => x.Item1 < testInt2).Slinq(), eq)) {
 				Debug.LogError("TakeWhile failed.");
 				testCorrectness = false;
 			}
 
-			if (!tuples1.Slinq().TakeWhile((x, c) => x._1 < c, testInt2).SequenceEqual(tuples1.TakeWhile(x => x._1 < testInt2).Slinq(), eq)) {
+			if (!tuples1.Slinq().TakeWhile((x, c) => x.Item1 < c, testInt2).SequenceEqual(tuples1.TakeWhile(x => x.Item1 < testInt2).Slinq(), eq)) {
 				Debug.LogError("TakeWhile failed.");
 				testCorrectness = false;
 			}
@@ -491,12 +491,12 @@ namespace Smooth.Slinq.Test {
 				testCorrectness = false;
 			}
 	
-			if (!tuples1.Slinq().Where(x => x._1 < testInt).SequenceEqual(tuples1.Where(x => x._1 < testInt).Slinq(), eq)) {
+			if (!tuples1.Slinq().Where(x => x.Item1 < testInt).SequenceEqual(tuples1.Where(x => x.Item1 < testInt).Slinq(), eq)) {
 				Debug.LogError("Where failed.");
 				testCorrectness = false;
 			}
 
-			if (!tuples1.Slinq().Where((x, c) => x._1 < c, testInt).SequenceEqual(tuples1.Where(x => x._1 < testInt).Slinq(), eq)) {
+			if (!tuples1.Slinq().Where((x, c) => x.Item1 < c, testInt).SequenceEqual(tuples1.Where(x => x.Item1 < testInt).Slinq(), eq)) {
 				Debug.LogError("Where failed.");
 				testCorrectness = false;
 			}
@@ -504,15 +504,15 @@ namespace Smooth.Slinq.Test {
 			if (!tuples1.Slinq().Zip(tuples2.Slinq()).SequenceEqual(
 				Slinqable.Sequence(0, 1)
 				.TakeWhile(x => x < tuples1.Count && x < tuples2.Count)
-				.Select(x => Tuple.Create(tuples1[x], tuples2[x])))) {
+				.Select(x => ValueTuple.Create(tuples1[x], tuples2[x])))) {
 				Debug.LogError("Zip tuples failed.");
 				testCorrectness = false;
 			}
 
-			if (!tuples1.Slinq().Zip(tuples2.Slinq(), (a, b) => Tuple.Create(a._1, b._1)).SequenceEqual(
+			if (!tuples1.Slinq().Zip(tuples2.Slinq(), (a, b) => ValueTuple.Create(a.Item1, b.Item1)).SequenceEqual(
 				Slinqable.Sequence(0, 1)
 				.TakeWhile(x => x < tuples1.Count && x < tuples2.Count)
-				.Select(x => Tuple.Create(tuples1[x]._1, tuples2[x]._1)), eq)) {
+				.Select(x => ValueTuple.Create(tuples1[x].Item1, tuples2[x].Item1)), eq)) {
 				Debug.LogError("Zip failed.");
 				testCorrectness = false;
 			}
@@ -521,9 +521,9 @@ namespace Smooth.Slinq.Test {
 			    .ZipAll(tuples2.Slinq())
 			    .SequenceEqual(Slinqable.Sequence(0, 1)
 			               .TakeWhile(x => x < tuples1.Count || x < tuples2.Count)
-			               .Select(x => Tuple.Create(
-				x < tuples1.Count ?	new Option<Tuple<int, int>>(tuples1[x]) : new Option<Tuple<int, int>>(),
-				x < tuples2.Count ?	new Option<Tuple<int, int>>(tuples2[x]) : new Option<Tuple<int, int>>())))) {
+			               .Select(x => ValueTuple.Create(
+				x < tuples1.Count ?	new Option<ValueTuple<int, int>>(tuples1[x]) : new Option<ValueTuple<int, int>>(),
+				x < tuples2.Count ?	new Option<ValueTuple<int, int>>(tuples2[x]) : new Option<ValueTuple<int, int>>())))) {
 				Debug.LogError("ZipAll tuples failed.");
 				testCorrectness = false;
 			}
@@ -532,9 +532,9 @@ namespace Smooth.Slinq.Test {
 			    .ZipAll(tuples2.Slinq())
 			    .SequenceEqual(Slinqable.Sequence(0, 1)
 			               .TakeWhile(x => x + midSkip < tuples1.Count || x < tuples2.Count)
-			               .Select(x => Tuple.Create(
-				x + midSkip < tuples1.Count ? new Option<Tuple<int, int>>(tuples1[x + midSkip]) : new Option<Tuple<int, int>>(),
-				x < tuples2.Count ? new Option<Tuple<int, int>>(tuples2[x]) : new Option<Tuple<int, int>>())))) {
+			               .Select(x => ValueTuple.Create(
+				x + midSkip < tuples1.Count ? new Option<ValueTuple<int, int>>(tuples1[x + midSkip]) : new Option<ValueTuple<int, int>>(),
+				x < tuples2.Count ? new Option<ValueTuple<int, int>>(tuples2[x]) : new Option<ValueTuple<int, int>>())))) {
 				Debug.LogError("ZipAll tuples failed.");
 				testCorrectness = false;
 			}
@@ -543,62 +543,62 @@ namespace Smooth.Slinq.Test {
 			    .ZipAll(tuples2.Slinq().Skip(midSkip))
 			    .SequenceEqual(Slinqable.Sequence(0, 1)
 			               .TakeWhile(x => x < tuples1.Count || x + midSkip < tuples2.Count)
-			               .Select(x => Tuple.Create(
-				x < tuples1.Count ? new Option<Tuple<int, int>>(tuples1[x]) : new Option<Tuple<int, int>>(),
-				x + midSkip < tuples2.Count ? new Option<Tuple<int, int>>(tuples2[x + midSkip]) : new Option<Tuple<int, int>>())))) {
+			               .Select(x => ValueTuple.Create(
+				x < tuples1.Count ? new Option<ValueTuple<int, int>>(tuples1[x]) : new Option<ValueTuple<int, int>>(),
+				x + midSkip < tuples2.Count ? new Option<ValueTuple<int, int>>(tuples2[x + midSkip]) : new Option<ValueTuple<int, int>>())))) {
 				Debug.LogError("ZipAll tuples failed.");
 				testCorrectness = false;
 			}
 			
 			if (!tuples1.Slinq()
-			    .ZipAll(tuples2.Slinq(), (a, b) => Tuple.Create(a, b))
+			    .ZipAll(tuples2.Slinq(), (a, b) => ValueTuple.Create(a, b))
 			    .SequenceEqual(Slinqable.Sequence(0, 1)
 			               .TakeWhile(x => x < tuples1.Count || x < tuples2.Count)
-			               .Select(x => Tuple.Create(
-				x < tuples1.Count ?	new Option<Tuple<int, int>>(tuples1[x]) : new Option<Tuple<int, int>>(),
-				x < tuples2.Count ?	new Option<Tuple<int, int>>(tuples2[x]) : new Option<Tuple<int, int>>())))) {
+			               .Select(x => ValueTuple.Create(
+				x < tuples1.Count ?	new Option<ValueTuple<int, int>>(tuples1[x]) : new Option<ValueTuple<int, int>>(),
+				x < tuples2.Count ?	new Option<ValueTuple<int, int>>(tuples2[x]) : new Option<ValueTuple<int, int>>())))) {
 				Debug.LogError("ZipAll failed.");
 				testCorrectness = false;
 			}
 			
 			if (!tuples1.Slinq().Skip(midSkip)
-			    .ZipAll(tuples2.Slinq(), (a, b) => Tuple.Create(a, b))
+			    .ZipAll(tuples2.Slinq(), (a, b) => ValueTuple.Create(a, b))
 			    .SequenceEqual(Slinqable.Sequence(0, 1)
 			               .TakeWhile(x => x + midSkip < tuples1.Count || x < tuples2.Count)
-			               .Select(x => Tuple.Create(
-				x + midSkip < tuples1.Count ? new Option<Tuple<int, int>>(tuples1[x + midSkip]) : new Option<Tuple<int, int>>(),
-				x < tuples2.Count ? new Option<Tuple<int, int>>(tuples2[x]) : new Option<Tuple<int, int>>())))) {
+			               .Select(x => ValueTuple.Create(
+				x + midSkip < tuples1.Count ? new Option<ValueTuple<int, int>>(tuples1[x + midSkip]) : new Option<ValueTuple<int, int>>(),
+				x < tuples2.Count ? new Option<ValueTuple<int, int>>(tuples2[x]) : new Option<ValueTuple<int, int>>())))) {
 				Debug.LogError("ZipAll failed.");
 				testCorrectness = false;
 			}
 
 			if (!tuples1.Slinq()
-			    .ZipAll(tuples2.Slinq().Skip(midSkip), (a, b) => Tuple.Create(a, b))
+			    .ZipAll(tuples2.Slinq().Skip(midSkip), (a, b) => ValueTuple.Create(a, b))
 			    .SequenceEqual(Slinqable.Sequence(0, 1)
 			               .TakeWhile(x => x < tuples1.Count || x + midSkip < tuples2.Count)
-			               .Select(x => Tuple.Create(
-				x < tuples1.Count ? new Option<Tuple<int, int>>(tuples1[x]) : new Option<Tuple<int, int>>(),
-				x + midSkip < tuples2.Count ? new Option<Tuple<int, int>>(tuples2[x + midSkip]) : new Option<Tuple<int, int>>())))) {
+			               .Select(x => ValueTuple.Create(
+				x < tuples1.Count ? new Option<ValueTuple<int, int>>(tuples1[x]) : new Option<ValueTuple<int, int>>(),
+				x + midSkip < tuples2.Count ? new Option<ValueTuple<int, int>>(tuples2[x + midSkip]) : new Option<ValueTuple<int, int>>())))) {
 				Debug.LogError("ZipAll failed.");
 				testCorrectness = false;
 			}
 
-			if (!tuples1.Slinq().ZipWithIndex().All(x => x._1._2 == x._2) ||
-			    !tuples1.Slinq().ZipWithIndex().Select(x => x._1).SequenceEqual(tuples1.Slinq(), eq)) {
+			if (!tuples1.Slinq().ZipWithIndex().All(x => x.Item1.Item2 == x.Item2) ||
+			    !tuples1.Slinq().ZipWithIndex().Select(x => x.Item1).SequenceEqual(tuples1.Slinq(), eq)) {
 				Debug.LogError("ZipWithIndex failed.");
 				testCorrectness = false;
 			}
 		}
 
-		private List<Tuple<int, int>> RemovableList() {
-			return new List<Tuple<int, int>>(tuples1);
+		private List<ValueTuple<int, int>> RemovableList() {
+			return new List<ValueTuple<int, int>>(tuples1);
 		}
 
-		private LinkedList<Tuple<int, int>> RemovableLinkedList() {
-			return new LinkedList<Tuple<int, int>>(tuples1);
+		private LinkedList<ValueTuple<int, int>> RemovableLinkedList() {
+			return new LinkedList<ValueTuple<int, int>>(tuples1);
 		}
 
-		public class Equals_1<T1, T2> : IEquatable<Equals_1<T1, T2>>, IEqualityComparer<Tuple<T1, T2>> {
+		public class Equals_1<T1, T2> : IEquatable<Equals_1<T1, T2>>, IEqualityComparer<ValueTuple<T1, T2>> {
 			public readonly IEqualityComparer<T1> equalityComparer;
 
 			public Equals_1() {
@@ -629,12 +629,12 @@ namespace Smooth.Slinq.Test {
 				return !lhs.Equals(rhs);
 			}
 
-			public bool Equals(Tuple<T1, T2> a, Tuple<T1, T2> b) {
-				return equalityComparer.Equals(a._1, b._1);
+			public bool Equals(ValueTuple<T1, T2> a, ValueTuple<T1, T2> b) {
+				return equalityComparer.Equals(a.Item1, b.Item1);
 			}
 
-			public int GetHashCode(Tuple<T1, T2> a) {
-				return equalityComparer.GetHashCode(a._1);
+			public int GetHashCode(ValueTuple<T1, T2> a) {
+				return equalityComparer.GetHashCode(a.Item1);
 			}
 		}
 	}
