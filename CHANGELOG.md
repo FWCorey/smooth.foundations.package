@@ -4,6 +4,9 @@ The latest version of the package fork of Smooth.Foundations is available at:
 
 https://https://github.com/FWCorey/smooth.foundations.package
 
+## [2.0.4] - 2022-09-07
+### Changed
+Updated to .NET Core 2.x
 
 ## [2.0.3] - 2022-09-07
 ### Changed
