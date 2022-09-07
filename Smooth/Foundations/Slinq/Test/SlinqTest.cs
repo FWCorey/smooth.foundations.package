@@ -22,8 +22,7 @@ namespace Smooth.Slinq.Test {
 		public static readonly Func<ValueTuple<int, int>, int> to_1f = t => t.Item1;
 
 		public static readonly IEqualityComparer<ValueTuple<int, int>> eq_1 = new Equals_1<int, int>();
-		//public static readonly DelegateFunc<ValueTuple<int, int>, Tuple<int, int>, bool> eq_1_p = Comparisons<ValueTuple<int, int>>.ToPredicate(eq_1);
-
+		
 		public static readonly StringBuilder stringBuilder = new StringBuilder();
 
 		public static List<ValueTuple<int, int>> tuples1 = new List<ValueTuple<int, int>>();
