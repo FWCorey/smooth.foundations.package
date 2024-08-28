@@ -26,7 +26,7 @@ namespace Smooth.Compare {
 		private static readonly Configuration config;
 
 		#region Types with specific comparers
-
+#if ENABLE_BLITTABLE_COMPARERS
 		/// <summary>
 		/// Registers an equality comparer for type T where T is an enumeration.
 		/// 
@@ -49,7 +49,7 @@ namespace Smooth.Compare {
 				Debug.LogError("Tried to register a non-enumeration type as an enumeration.");
 			}
 		}
-
+#endif
 		/// <summary>
 		/// Registers sort order and equality comparers for KeyValuePair<K, V>s.
 		/// 

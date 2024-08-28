@@ -55,7 +55,11 @@ namespace Smooth.Compare {
 			if (!type.IsValueType) {
 				return Option<IEqualityComparer<T>>.None;
 			} else if (type.IsEnum) {
+#if ENABLE_BLITTABLE_COMPARERS
 				return new Option<IEqualityComparer<T>>(EnumEqualityComparer<T>(type));
+#else
+				return Option<IEqualityComparer<T>>.None;
+#endif
 			} else if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(KeyValuePair<,>)) {
 				return new Option<IEqualityComparer<T>>(KeyValuePairEqualityComparer<T>(type));
 			} else {
@@ -208,7 +212,7 @@ namespace Smooth.Compare {
 		#endregion
 
 		#region EqualityComparers for specific types
-
+#if ENABLE_BLITTABLE_COMPARERS
 		private static IEqualityComparer<T> EnumEqualityComparer<T>(Type type) {
 			switch(Type.GetTypeCode(type)) {
 			case TypeCode.Int64:
@@ -218,6 +222,7 @@ namespace Smooth.Compare {
 				return new Blittable32EqualityComparer<T>();
 			}
 		}
+#endif
 		
 		private static IEqualityComparer<T> KeyValuePairEqualityComparer<T>(Type type) {
 			var l = Expression.Parameter(type, "l");

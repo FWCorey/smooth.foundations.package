@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if ENABLE_BLITTABLE_COMPARERS
+using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Smooth.Collections;
@@ -109,3 +110,4 @@ namespace Smooth.Compare.Comparers {
 //		}
 //	}
 }
+#endif

@@ -4,6 +4,11 @@ The latest version of the package fork of Smooth.Foundations is available at:
 
 https://https://github.com/FWCorey/smooth.foundations.package
 
+## [2.1.0] - 2024-08-29
+### Changed
+Build switched out Explicitly laid out Blittable generic structs for compatibility with assembly.GetTypes() as of C# 9.0 and earlier.
+To enable them, add ENABLE_BLITTABLE_COMPARERS to your build switches
+
 ## [2.0.5] - 2022-09-07
 ### Changed
 Converted a few stray Tuple<T usages to ValueTuple

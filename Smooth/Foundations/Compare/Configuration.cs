@@ -45,6 +45,7 @@ namespace Smooth.Compare {
 				// individual method call the compiler can easily discover with static inspection, and if supplying your own comparer
 				// implementation either inherit from the corresponding Smooth.Collections.Comparer or wrap your comparer in a FuncComparer to
 				// force the compiler to create the proper types.
+				// Enum Comparers can't be used unless ENABLE_BLITTABLE_COMPARERS is used which breaks GetTypes() calls on the Smooth .dll
 				//
 				
 				#region System built-in types
@@ -97,7 +98,7 @@ namespace Smooth.Compare {
 				Finder.Register<Quaternion>((a, b) => a == b);
 				
 				#endregion
-				
+#if ENABLE_BLITTABLE_COMPARERS	
 				#region UnityEngine enums
 				
 				Finder.RegisterEnum<AudioSpeakerMode>();
@@ -115,6 +116,7 @@ namespace Smooth.Compare {
 				Finder.RegisterEnum<EventType>();
 
 				#endregion
+#endif
 			}
 			
 			#endregion
